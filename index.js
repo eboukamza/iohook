@@ -117,6 +117,10 @@ class IOHook extends EventEmitter {
   setDebug(mode) {
     NodeHookAddon.debugEnable(mode);
   }
+
+  enable(mode) {
+    NodeHookAddon.grabEnable(mode);
+  }
   
   /**
    * Local event handler. Don't use it in your code!

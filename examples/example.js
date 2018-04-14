@@ -1,6 +1,7 @@
 'use strict';
 
 const ioHook = require('../index.js');
+var enabled = false;
 
 ioHook.on("mousedown",function(msg){console.log(msg);});
 
@@ -8,7 +9,11 @@ ioHook.on("keypress",function(msg){console.log(msg);});
 
 ioHook.on("keydown",function(msg){console.log(msg);});
 
-ioHook.on("keyup",function(msg){console.log(msg);});
+ioHook.on("keyup",function(msg){
+    console.log(msg);
+    enabled = !enabled;
+    ioHook.enable(enabled);
+});
 
 ioHook.on("mouseclick",function(msg){console.log(msg)});
 
@@ -19,7 +24,7 @@ ioHook.on("mousemove",function(msg){console.log(msg)});
 ioHook.on("mousedrag",function(msg){console.log(msg)});
 
 //start ioHook
-ioHook.start();
+ioHook.start(true);
 // ioHook.setDebug(true); // Uncomment this line for see all debug information from iohook
 
 const CTRL = 29;

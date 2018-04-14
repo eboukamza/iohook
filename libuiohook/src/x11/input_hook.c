@@ -100,6 +100,9 @@ static struct xkb_state *state = NULL;
 // Virtual event pointer.
 static uiohook_event event;
 
+static Display* disp;
+static Window win;
+
 // Event dispatch callback.
 static dispatcher_t dispatcher = NULL;
 
@@ -836,7 +839,7 @@ static inline bool enable_key_repeate() {
 static inline int xrecord_block() {
 	int status = UIOHOOK_FAILURE;
 
-	// Save the data display associated with this hook so it is passed to each event.
+    // Save the data display associated with this hook so it is passed to each event.
 	//XPointer closeure = (XPointer) (ctrl_display);
 	XPointer closeure = NULL;
 
@@ -853,7 +856,6 @@ static inline int xrecord_block() {
 		do {
 			// Unlock the mutex from the previous iteration.
 			pthread_mutex_unlock(&hook_xrecord_mutex);
-
 			XRecordProcessReplies(hook->data.display);
 
 			// Prevent 100% CPU utilization.
@@ -1063,8 +1065,29 @@ static int xrecord_start() {
 	return status;
 }
 
+static void init_grab() {
+    disp = XOpenDisplay(NULL);
+    win = XDefaultRootWindow(disp);
+}
+
+static void enable_grab() {
+    unsigned int masks = ButtonPressMask | ButtonReleaseMask;
+    XGrabPointer(disp, win, true, masks, GrabModeAsync, GrabModeAsync, None, None, CurrentTime);
+    logger(LOG_LEVEL_INFO,	"%s [%u]: grab enabled.\n",
+           __FUNCTION__, __LINE__);
+}
+
+static void disble_grab() {
+    XSynchronize(disp, True);
+    int result = XUngrabPointer(disp, CurrentTime);
+    logger(LOG_LEVEL_INFO,	"%s [%u]: grab disabled with synchronize %d.\n",
+           __FUNCTION__, __LINE__, result);
+}
+
 UIOHOOK_API int hook_run() {
 	int status = UIOHOOK_FAILURE;
+	init_grab();
+	enable_grab();
 
 	// Hook data for future cleanup.
 	hook = malloc(sizeof(hook_info));
@@ -1094,6 +1117,14 @@ UIOHOOK_API int hook_run() {
 	return status;
 }
 
+UIOHOOK_API void grab_enable(bool enabled) {
+	if(enabled) {
+		enable_grab();
+	} else {
+		disble_grab();
+	}
+}
+
 UIOHOOK_API int hook_stop() {
 	int status = UIOHOOK_FAILURE;
 
@@ -1110,6 +1141,8 @@ UIOHOOK_API int hook_stop() {
 					pthread_cond_signal(&hook_xrecord_cond);
 					pthread_mutex_unlock(&hook_xrecord_mutex);
 					#endif
+
+					XCloseDisplay(disp);
 
 					// See Bug 42356 for more information.
 					// https://bugs.freedesktop.org/show_bug.cgi?id=42356#c4

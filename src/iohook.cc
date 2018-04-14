@@ -479,6 +479,13 @@ void HookProcessWorker::Stop()
   sIsRunning = false;
 }
 
+NAN_METHOD(GrabEnable) {
+  if (info.Length() > 0)
+  {
+    grab_enable(info[0]->IsTrue());
+  }
+}
+
 NAN_METHOD(DebugEnable) {
   if (info.Length() > 0)
   {
@@ -527,6 +534,9 @@ NAN_MODULE_INIT(Init) {
   
   Nan::Set(target, Nan::New<String>("debugEnable").ToLocalChecked(),
   Nan::GetFunction(Nan::New<FunctionTemplate>(DebugEnable)).ToLocalChecked());
+
+  Nan::Set(target, Nan::New<String>("grabEnable").ToLocalChecked(),
+  Nan::GetFunction(Nan::New<FunctionTemplate>(GrabEnable)).ToLocalChecked());
 }
 
 NODE_MODULE(nodeHook, Init)

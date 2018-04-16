@@ -1,6 +1,6 @@
 {
   "name": "iohook",
-  "version": "0.1.15",
+  "version": "0.2.0",
   "description": "Node.js global keyboard and mouse hook",
   "main": "index.js",
   "types": "index.d.ts",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/WilixLead/iohook.git"
+    "url": "git+https://github.com/eboukamza/iohook.git"
   },
   "keywords": [
     "hook",
@@ -27,11 +27,12 @@
     "shortcut"
   ],
   "author": "Aloyan Dmitry",
+  "contributors": ["Elias Zain"],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/WilixLead/iohook/issues"
+    "url": "https://github.com/eboukamza/iohook/issues"
   },
-  "homepage": "https://github.com/WilixLead/iohook#readme",
+  "homepage": "https://github.com/eboukamza/iohook#readme",
   "dependencies": {
     "@types/node": "^7.0.39",
     "bindings": "^1.3.0",

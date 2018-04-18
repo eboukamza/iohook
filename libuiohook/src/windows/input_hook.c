@@ -50,6 +50,8 @@ static uiohook_event event;
 // Event dispatch callback.
 static dispatcher_t dispatcher = NULL;
 
+static bool grab_enabled = true;
+
 UIOHOOK_API void hook_set_dispatch_proc(dispatcher_t dispatch_proc) {
 	logger(LOG_LEVEL_DEBUG,	"%s [%u]: Setting new dispatch callback to %#p.\n",
 			__FUNCTION__, __LINE__, dispatch_proc);
@@ -615,7 +617,9 @@ LRESULT CALLBACK mouse_hook_event_proc(int nCode, WPARAM wParam, LPARAM lParam) 
 
 	LRESULT hook_result = -1;
 	if (nCode < 0 || event.reserved ^ 0x01) {
-		hook_result = CallNextHookEx(mouse_event_hhook, nCode, wParam, lParam);
+		if (!grab_enabled) {
+			hook_result = CallNextHookEx(mouse_event_hhook, nCode, wParam, lParam);
+		}
 	}
 	else {
 		logger(LOG_LEVEL_DEBUG,	"%s [%u]: Consuming the current event. (%li)\n",
@@ -645,26 +649,33 @@ void CALLBACK win_hook_event_proc(HWINEVENTHOOK hook, DWORD event, HWND hWnd, LO
 			// Restart the event hooks.
 			keyboard_event_hhook = SetWindowsHookEx(WH_KEYBOARD_LL, keyboard_hook_event_proc, hInst, 0);
 			mouse_event_hhook = SetWindowsHookEx(WH_MOUSE_LL, mouse_hook_event_proc, hInst, 0);
-			
+
 			// Re-initialize modifier masks.
 			initialize_modifiers();
-			
-			// FIXME We should compare the modifier mask before and after the restart 
+
+			// FIXME We should compare the modifier mask before and after the restart
 			// to determine if we should synthesize missing events.
-	
+
 			// Check for event hook error.
 			if (keyboard_event_hhook == NULL || mouse_event_hhook == NULL) {
 				logger(LOG_LEVEL_ERROR,	"%s [%u]: SetWindowsHookEx() failed! (%#lX)\n",
 						__FUNCTION__, __LINE__, (unsigned long) GetLastError());
 			}
 			break;
-			
+
 		default:
 			logger(LOG_LEVEL_INFO, "%s [%u]: Unhandled Windows window event: %#X.\n",
 					__FUNCTION__, __LINE__, event);
 	}
 }
 
+UIOHOOK_API void grab_enable(bool enabled) {
+	if(enabled) {
+		grab_enabled = true;
+	} else {
+		grab_enabled = false;
+	}
+}
 
 UIOHOOK_API int hook_run() {
 	int status = UIOHOOK_FAILURE;

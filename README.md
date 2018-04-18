@@ -214,6 +214,7 @@ If you want to manually compile it, follow the instructions below.
 
 ### Ubuntu 16
 - `sudo apt install libx11-dev libxtst-dev libxt-dev libx11-xcb-dev libxkbcommon-dev libxkbcommon-x11-dev`
+- `sudo apt install cmake autoconf automake autogen libtool libxinerama-dev clang`
 - `npm run build`
 
 ### macOS

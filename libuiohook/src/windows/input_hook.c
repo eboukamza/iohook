@@ -508,6 +508,7 @@ static void process_mouse_wheel(MSLLHOOKSTRUCT *mshook, uint8_t direction) {
 
 LRESULT CALLBACK mouse_hook_event_proc(int nCode, WPARAM wParam, LPARAM lParam) {
 	MSLLHOOKSTRUCT *mshook = (MSLLHOOKSTRUCT *) lParam;
+	bool callNextHook = !grab_enabled;
 	switch (wParam) {
 		case WM_LBUTTONDOWN:
 			set_modifier_mask(MASK_BUTTON1);
@@ -594,6 +595,7 @@ LRESULT CALLBACK mouse_hook_event_proc(int nCode, WPARAM wParam, LPARAM lParam) 
 
 		case WM_MOUSEMOVE:
 			process_mouse_moved(mshook);
+			callNextHook = true;
 			break;
 
 		case WM_MOUSEWHEEL:
@@ -617,7 +619,7 @@ LRESULT CALLBACK mouse_hook_event_proc(int nCode, WPARAM wParam, LPARAM lParam) 
 
 	LRESULT hook_result = -1;
 	if (nCode < 0 || event.reserved ^ 0x01) {
-		if (!grab_enabled || wParam == WM_MOUSEMOVE) {
+		if (callNextHook) {
 			hook_result = CallNextHookEx(mouse_event_hhook, nCode, wParam, lParam);
 		}
 	}
